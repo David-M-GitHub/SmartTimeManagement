@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  admin
+  user
+}
+
+enum Code {
+  ADI
+  AKN
+  X
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  name         String
+  email        String    @unique
+  passworthash String
+  role         Role      @default(user)
+  entries      TimeEntry[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Customer {
+  id      Int      @id @default(autoincrement())
+  name    String
+  number  String?
+  entries TimeEntry[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model TimeEntry {
+  id               Int      @id @default(autoincrement())
+  user             User     @relation(fields: [userId], references: [id])
+  userId           Int
+  date             DateTime
+  code             Code
+  start            String   // HH:MM
+  end              String   // HH:MM
+  area_or_customer String?
+  description      String?
+  order_number     String?
+  todo             Boolean  @default(false)
+  customer         Customer? @relation(fields: [customerId], references: [id])
+  customerId       Int?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  @@index([userId, date])
+}
